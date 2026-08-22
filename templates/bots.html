@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bots - Telegram Manager</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0e1621; color: #e1e3e6; min-height: 100vh; }
+  .nav { background: #17212b; padding: 12px 24px; display: flex; align-items: center; gap: 24px; border-bottom: 1px solid #2b3945; }
+  .nav a { color: #6ab2f2; text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; }
+  .nav a:hover, .nav a.active { background: #2b3945; }
+  .nav .brand { color: #fff; font-weight: 600; font-size: 16px; margin-right: 16px; }
+  .container { max-width: 900px; margin: 24px auto; padding: 0 20px; }
+  .card { background: #17212b; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .toolbar input[type=text] { flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 8px; border: 1px solid #2b3945; background: #0e1621; color: #e1e3e6; font-size: 14px; }
+  .toolbar input:focus { outline: none; border-color: #6ab2f2; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+  .btn-primary { background: #2b5278; color: #fff; }
+  .btn-primary:hover { background: #3a6ea5; }
+  .btn-danger { background: #783030; color: #fff; }
+  .btn-danger:hover { background: #a04040; }
+  .btn-warning { background: #7a5a00; color: #fff; }
+  .btn-warning:hover { background: #a07a00; }
+  .btn-outline { background: transparent; border: 1px solid #2b3945; color: #e1e3e6; }
+  .btn-outline:hover { border-color: #6ab2f2; color: #6ab2f2; }
+  .list { max-height: 60vh; overflow-y: auto; }
+  .item { display: flex; align-items: center; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; gap: 12px; }
+  .item:hover { background: #1b2836; }
+  .item.selected { background: #2b3945; }
+  .item input[type=checkbox] { width: 18px; height: 18px; accent-color: #6ab2f2; cursor: pointer; }
+  .item-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; background: #6a2b6a; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-info .name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-info .meta { font-size: 12px; color: #8b9bab; }
+  #status { padding: 10px; border-radius: 8px; margin-top: 12px; font-size: 13px; display: none; }
+  #status.ok { display: block; background: #1b3a1b; color: #6adf6a; }
+  #status.err { display: block; background: #3a1b1b; color: #df6a6a; }
+  .empty { text-align: center; padding: 40px; color: #8b9bab; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <span class="brand">⚡ TG Manager</span>
+  <a href="/">Home</a>
+  <a href="/channels">Channels</a>
+  <a href="/bots" class="active">Bots</a>
+</nav>
+<div class="container">
+  <div class="card">
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="Search bots..." oninput="filter()">
+      <button class="btn btn-outline btn-sm" onclick="selectAll()">Select All</button>
+      <button class="btn btn-outline btn-sm" onclick="selectNone()">Deselect</button>
+      <button class="btn btn-danger" onclick="doAction('block')">Block</button>
+      <button class="btn btn-warning" onclick="doAction('delete')">Delete</button>
+      <button class="btn btn-danger" onclick="doAction('block_delete')" style="background:#5a1a1a;">Block & Delete</button>
+    </div>
+    <div id="list" class="list"><div class="empty">Loading...</div></div>
+    <div id="status"></div>
+  </div>
+</div>
+<script>
+let bots = [];
+
+const actionLabels = { block: 'Block', delete: 'Delete', block_delete: 'Block & Delete' };
+
+async function load() {
+  const r = await fetch('/api/bots');
+  bots = await r.json();
+  render();
+}
+
+function render(filterText = '') {
+  const el = document.getElementById('list');
+  const q = filterText.toLowerCase();
+  const filtered = bots.filter(b => b.name.toLowerCase().includes(q) || b.username.toLowerCase().includes(q));
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No bots found</div>'; return; }
+  el.innerHTML = filtered.map(b => `
+    <div class="item" data-id="${b.id}" onclick="toggle(this, ${b.id})">
+      <input type="checkbox" data-id="${b.id}">
+      <div class="item-icon">🤖</div>
+      <div class="item-info">
+        <div class="name">${esc(b.name || b.username)}</div>
+        <div class="meta">@${esc(b.username)} · ID: ${b.id}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function filter() { render(document.getElementById('search').value); }
+function toggle(el, id) {
+  const cb = el.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  el.classList.toggle('selected', cb.checked);
+}
+function selectAll() {
+  document.querySelectorAll('.item input[type=checkbox]').forEach(cb => { cb.checked = true; cb.closest('.item').classList.add('selected'); });
+}
+function selectNone() {
+  document.querySelectorAll('.item input[type=checkbox]').forEach(cb => { cb.checked = false; cb.closest('.item').classList.remove('selected'); });
+}
+
+async function doAction(action) {
+  const ids = [...document.querySelectorAll('.item input[type=checkbox]:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) { show('No bots selected', true); return; }
+  if (!confirm(`${actionLabels[action]} ${ids.length} bots?`)) return;
+  const fd = new FormData();
+  fd.append('ids', ids.join(','));
+  fd.append('action', action);
+  const r = await fetch('/api/bots/action', { method: 'POST', body: fd });
+  const res = await r.json();
+  const ok = res.filter(x => x.ok).length;
+  const fail = res.filter(x => !x.ok).length;
+  show(`${actionLabels[action]} ${ok} bots${fail ? ', failed: ' + fail : ''}`, fail > 0);
+  const doneIds = new Set(res.filter(x => x.ok).map(x => String(x.id)));
+  bots = bots.filter(b => !doneIds.has(String(b.id)));
+  render(document.getElementById('search').value);
+}
+
+function show(msg, err) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = err ? 'err' : 'ok';
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+load();
+</script>
+</body>
+</html>

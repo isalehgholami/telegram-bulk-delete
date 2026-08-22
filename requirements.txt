@@ -1,0 +1,8 @@
+telethon
+fastapi
+uvicorn
+jinja2
+python-multipart
+aiofiles
+python-socks[asyncio]
+python-dotenv
