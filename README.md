@@ -6,7 +6,7 @@ Bulk leave channels and block bots on Telegram via web dashboard.
 
 | Channels                                                                                                 | Bots                                                                                             |
 | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| ![Channels](https://raw.githubusercontent.com/isalehgholami/tg-chbot-bulk-delete/main/docs/channels.png) | ![Bots](https://raw.githubusercontent.com/isalehgholami/tg-chbot-bulk-delete/main/docs/bots.png) |
+| ![Channels](https://raw.githubusercontent.com/isalehgholami/telegram-bulk-delete/main/docs/channels.png) | ![Bots](https://raw.githubusercontent.com/isalehgholami/telegram-bulk-delete/main/docs/bots.png) |
 
 ## Setup
 
