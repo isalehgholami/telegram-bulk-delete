@@ -1,6 +1,12 @@
-# Telegram Manager
+# Telegram Bulk Delete
 
-Bulk leave channels and block bots via web dashboard.
+Bulk leave channels and block bots on Telegram via web dashboard.
+
+## Screenshots
+
+| Channels                                                                                                 | Bots                                                                                             |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| ![Channels](https://raw.githubusercontent.com/isalehgholami/tg-chbot-bulk-delete/main/docs/channels.png) | ![Bots](https://raw.githubusercontent.com/isalehgholami/tg-chbot-bulk-delete/main/docs/bots.png) |
 
 ## Setup
 
@@ -28,8 +34,8 @@ source venv/bin/activate
 python main.py
 ```
 
-4. Open http://127.0.0.1:8686
-5. First run asks for phone number + code to login (session saved locally)
+5. Open http://127.0.0.1:8686
+6. First run asks for phone number + code to login (session saved locally)
 
 ## Features
 
@@ -37,3 +43,11 @@ python main.py
 - **Block Bots**: view all bot contacts, select multiple, bulk block
 - **Leave All Channels**: one-click nuke all channels (not groups)
 - Dark Telegram-style UI
+
+## Developer
+
+**iSalehGholami** — [GitHub](https://github.com/isalehgholami)
+
+## License
+
+MIT
